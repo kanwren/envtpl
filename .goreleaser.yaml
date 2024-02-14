@@ -1,0 +1,28 @@
+version: 1
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - id: envtpl
+    main: ./cmd/envtpl
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - windows
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w -X main.AppVersionMetadata={{ .CommitTimestamp }}
+
+archives:
+  - format: tar.gz
+    name_template: >-
+      {{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ with .Arm }}v{{ . }}{{ end }}{{ if not (eq .Amd64 "v1") }}{{ .Amd64 }}{{ end }}
+    format_overrides:
+      - goos: windows
+        format: zip
